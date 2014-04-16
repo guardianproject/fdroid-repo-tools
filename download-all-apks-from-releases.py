@@ -2,10 +2,10 @@
 
 import binascii
 import os
+import sys
 import tempfile
 import urllib2
 from BeautifulSoup import BeautifulSoup
-import pprint
 
 
 def download_all_apks_and_sigs(url, dldir):
@@ -37,8 +37,9 @@ def download_all_apks_and_sigs(url, dldir):
                 with open(os.path.join(dldir, apkname + '.sig'), 'w') as f:
                     f.writelines(apksig)
             except urllib2.HTTPError as e:
-                print(os.path.basename(apklink) + ' has no signature file!')
+                print('FAILED: ' + os.path.basename(apklink) + ' has no signature file!')
                 print(e)
+                sys.exit(1)
 
 
 tmpdir = tempfile.mkdtemp(prefix='.gp-releases-audit-')
@@ -46,3 +47,19 @@ print('its all in ' + tmpdir)
 
 download_all_apks_and_sigs('https://guardianproject.info/releases', tmpdir)
 download_all_apks_and_sigs('https://guardianproject.info/releases/archive', tmpdir)
+
+# verify the GPG sigs on all of the APKs
+for root, _, files in os.walk(tmpdir):
+    for name in files:
+        if name.endswith('.apk'):
+            apk = os.path.join(root, name)
+            if os.path.exists(apk + '.sig'):
+                sig = apk + '.sig'
+            elif os.path.exists(apk + '.asc'):
+                sig = apk + '.asc'
+            else:
+                print('FAILED: "' + name + '" has no GPG signature file!')
+                sys.exit(1)
+            if subprocess.call(['gpg2', '--verify', sig]) != 0:
+                print('FAILED: ' + sig)
+                sys.exit(1)
