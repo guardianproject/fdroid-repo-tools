@@ -23,7 +23,10 @@ for f in `find $apksource -name '*.apk' | grep -F -v -e unaligned -e unsigned`; 
     name=$(basename $(dirname `dirname $f`))
     echo "name $name"
     apk=`aapt d badging "$f" | sed -n "s,^package: name='\(.*\)' versionCode='\([0-9][0-9]*\)' .*,\1_\2.apk,p"`
-    rsync -axv $f repo/$apk
+    # first try a hard link, then fall back to rsync to copy
+    echo "$f --> repo/$apk"
+    ln $f repo/$apk || \
+        rsync -axv $f repo/$apk
 done
 
 test -e config.py || $fdroid init --keystore ./keystore.jks
