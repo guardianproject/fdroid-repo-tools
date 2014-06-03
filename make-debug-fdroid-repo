@@ -3,17 +3,21 @@
 #------------------------------------------------------------------------------#
 # "main"
 
-fdroid=~/code/fdroid/fdroidserver/fdroid
-
 if [ $# -gt 0 ]; then
     apksource=$1
 else
     apksource=~jenkins/
 fi
 
+if [ $# -gt 1 ]; then
+    fdroid=$2
+else
+    fdroid="fdroid"
+fi
+
 if [ ! -d $apksource ]; then
     echo "APK source dir '$apksource' does not exist! Specify one:"
-    echo "$0 /path/to/folder/with/apks"
+    echo "$0 /path/to/folder/with/apks [/path/to/fdroidserver/fdroid]"
     exit 1
 fi
 
