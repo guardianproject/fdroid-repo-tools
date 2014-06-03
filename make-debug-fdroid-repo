@@ -24,7 +24,7 @@ fi
 test -d repo || mkdir repo
 
 for f in `find $apksource -name '*.apk' 2> /dev/null \
-    | grep -F -v -e unaligned -e unsigned | grep -F -v /out/target/product`; do
+    | grep '/bin/' | grep -F -v -e unaligned -e unsigned -e /archive/`; do
     name=$(basename $(dirname `dirname $f`))
     apk=`aapt dump badging "$f" | sed -n "s,^package: name='\(.*\)' versionCode='\([0-9][0-9]*\)' .*,\1_\2.apk,p"`
     test $f -nt repo/$apk && rm -f repo/$apk  # delete existing if $f is newer
