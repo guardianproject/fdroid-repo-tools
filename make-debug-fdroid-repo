@@ -38,3 +38,4 @@ done
 
 test -e config.py || $fdroid init --keystore ./keystore.jks
 $fdroid update -c
+$fdroid server update
