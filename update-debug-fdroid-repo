@@ -1,0 +1,39 @@
+#!/bin/sh
+
+if [ $# -gt 0 ]; then
+    apksource=$1
+else
+    apksource=~jenkins/
+fi
+
+if [ $# -gt 1 ]; then
+    fdroid=$2
+else
+    fdroid="fdroid"
+fi
+
+if [ ! -d $apksource ]; then
+    echo "APK source dir '$apksource' does not exist! Specify one:"
+    echo "$0 /path/to/folder/with/apks [/path/to/fdroidserver/fdroid]"
+    exit 1
+fi
+
+test -d repo || exit
+test -e config.py || exit
+test -e keystore.jks || exit
+
+for f in `find $apksource -name '*.apk' 2> /dev/null \
+    | grep '/bin/' | grep -F -v -e unaligned -e unsigned -e /archive/`; do
+    name=$(basename $(dirname `dirname $f`))
+    apk=`aapt dump badging "$f" | sed -n "s,^package: name='\(.*\)' versionCode='\([0-9][0-9]*\)' .*,\1_\2.apk,p"`
+    test $f -nt repo/$apk && rm -f repo/$apk  # delete existing if $f is newer
+    if [ ! -e repo/$apk ] && [ ! -e archive/$apk ]; then
+        echo "$f --> repo/$apk"
+        ln $f repo/$apk || \
+            ln -s $f repo/$apk || \
+            rsync -axv $f repo/$apk # rsync if hard link is not possible
+    fi
+done
+
+$fdroid update --create-metadata --verbose
+$fdroid server update --verbose
