@@ -22,6 +22,14 @@ test -d repo || exit
 test -e config.py || exit
 test -e keystore.jks || exit
 
+# if we can find the specific projects that want us, then narrow the APK
+# search to just those subdirs
+projects=`grep -F '<childProjects>update-debug-fdroid-repo</childProjects>' $apksource/jobs/*/config.xml \
+    | sed -n 's,\(.*/config.xml\):.*,\1,p'`
+if [ ! -z $projects ]; then
+    apksource=$projects
+fi
+
 for f in `find $apksource -name '*.apk' 2> /dev/null \
     | grep '/bin/' | grep -F -v -e unaligned -e unsigned -e /archive/`; do
     name=$(basename $(dirname `dirname $f`))
