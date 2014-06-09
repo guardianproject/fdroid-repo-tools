@@ -1,5 +1,8 @@
 #!/bin/sh
 
+set -e
+set -x
+
 if [ $# -gt 0 ]; then
     apksource=$1
 else
