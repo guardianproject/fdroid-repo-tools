@@ -43,5 +43,5 @@ for f in `find $apksource -name '*.apk' 2> /dev/null \
     fi
 done
 
-$fdroid update --create-metadata --verbose
+$fdroid update --verbose --delete-unknown
 $fdroid server update --verbose
