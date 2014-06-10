@@ -3,6 +3,7 @@
 import binascii
 import os
 import sys
+import subprocess
 import tempfile
 import urllib2
 from BeautifulSoup import BeautifulSoup
@@ -41,12 +42,14 @@ def download_all_apks_and_sigs(url, dldir):
                 print(e)
                 sys.exit(1)
 
-
-tmpdir = tempfile.mkdtemp(prefix='.gp-releases-audit-')
+if len(sys.argv) == 2:
+    tmpdir = sys.argv[1]
+else:
+    tmpdir = tempfile.mkdtemp(prefix='.gp-releases-audit-')
+    download_all_apks_and_sigs('https://guardianproject.info/releases', tmpdir)
+    download_all_apks_and_sigs('https://guardianproject.info/releases/archive', tmpdir)
 print('its all in ' + tmpdir)
 
-download_all_apks_and_sigs('https://guardianproject.info/releases', tmpdir)
-download_all_apks_and_sigs('https://guardianproject.info/releases/archive', tmpdir)
 
 # verify the GPG sigs on all of the APKs
 for root, _, files in os.walk(tmpdir):
