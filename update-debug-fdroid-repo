@@ -48,3 +48,5 @@ done
 
 $fdroid update --verbose --delete-unknown
 $fdroid server update --verbose
+rsync -axv repo/ /var/www/fdroid/repo/
+rsync -axv archive/ /var/www/fdroid/archive/
