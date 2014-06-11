@@ -72,3 +72,7 @@ for root, _, files in os.walk(tmpdir):
             files = {'apk': (name, open(os.path.join(root, name), 'rb'))}
             r = requests.post('https://androidobservatory.org/upload',
                               files=files, verify=True)
+            print('Uploading to https://www.virustotal.com:')
+            files = {'file': (name, open(os.path.join(root, name), 'rb'))}
+            r = requests.post('https://www.virustotal.com/en/file/upload/',
+                              files=files, verify=True)
