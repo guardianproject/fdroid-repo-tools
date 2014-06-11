@@ -2,6 +2,7 @@
 
 import binascii
 import os
+import requests
 import sys
 import subprocess
 import tempfile
@@ -55,6 +56,7 @@ print('its all in ' + tmpdir)
 for root, _, files in os.walk(tmpdir):
     for name in files:
         if name.endswith('.apk'):
+            print(name + ':')
             apk = os.path.join(root, name)
             if os.path.exists(apk + '.sig'):
                 sig = apk + '.sig'
@@ -66,3 +68,7 @@ for root, _, files in os.walk(tmpdir):
             if subprocess.call(['gpg2', '--verify', sig]) != 0:
                 print('FAILED: ' + sig)
                 sys.exit(1)
+            print('Uploading to https://androidobservatory.org:')
+            files = {'apk': (name, open(os.path.join(root, name), 'rb'))}
+            r = requests.post('https://androidobservatory.org/upload',
+                              files=files, verify=True)
