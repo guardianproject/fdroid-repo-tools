@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -e
+set -x
+
+if [ -f ${1}.sig ]; then
+    gpg --verify ${1}.sig
+elif [ -f ${1}.asc ]; then
+    gpg --verify ${1}.asc
+else
+    echo "No GPG signature to verify APK!"
+    exit 1
+fi
+
+apk=`echo $1 | sed s,-unaligned,,`
+
+zipalign -f -v 4 $1 $apk
+
+gpg --detach-sign $apk
