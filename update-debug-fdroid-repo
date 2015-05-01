@@ -69,7 +69,7 @@ for d in ~/debug/[a-z.]*; do
     test -d $d/fdroid || continue
     test -d $d/fdroid/repo || continue
     packageName=`basename $d`
-    icon=`ls -1 $packageName/fdroid/repo/icons-240/$packageName_*.png | sort -n | tail -1`
+    icon=`cd ~/debug/ && ls -1 $packageName/fdroid/repo/icons-240/$packageName_*.png | sort -n | tail -1`
     echo "<li><a href=\"/debug/$packageName/fdroid/repo\"><img src=\"$icon\" /> $packageName</a></li>" >> ~/debug/index.html
     fdroiddir=~/debug/$packageName/fdroid
     for f in */$packageName*.apk; do
