@@ -117,7 +117,9 @@ for d in ~/debug/[a-z.]*; do
     qrpng=$fdroiddir/repo/qr.png
     repoindex=$fdroiddir/repo/index.html
     qr "https://dev.guardianproject.info$urlpathquery" > $qrpng
-    echo "<html><body><h1>https://dev.guardianproject.info$urlpathquery</h1><img src=\"$urlpath/qr.png\" /></body></html>" > $repoindex
+    echo "<html><body><a href=\"https://dev.guardianproject.info$urlpathquery\">" > $repoindex
+    echo "<h1>https://dev.guardianproject.info$urlpath</h1>" >> $repoindex
+    echo "<img src=\"$urlpath/qr.png\" /></a></body></html>" >> $repoindex
     for f in */$packageName*.apk; do
         test -r $f || continue
         if $aapt dump xmltree $f AndroidManifest.xml | grep 'android:debuggable.*0x0$'; then
