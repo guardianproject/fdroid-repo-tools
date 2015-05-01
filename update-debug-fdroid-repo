@@ -62,12 +62,15 @@ rsync -axv --delete-after archive/ /var/www/fdroid/archive/
 
 # now manage per-app repos
 basedir=`pwd`
+echo "<html><body><ul>" > ~/debug/index.html
 for d in ~/debug/[a-z.]*; do
     cd $basedir
     test -d $d || continue
     test -d $d/fdroid || continue
     test -d $d/fdroid/repo || continue
     packageName=`basename $d`
+    icon=`ls -1 $packageName/fdroid/repo/icons-240/$packageName_*.png | sort -n | tail -1`
+    echo "<li><a href=\"/debug/$packageName/fdroid/repo\"><img src=\"$icon\" /> $packageName</a></li>" >> ~/debug/index.html
     fdroiddir=~/debug/$packageName/fdroid
     for f in */$packageName*.apk; do
         test -r $f || continue
@@ -85,11 +88,5 @@ for d in ~/debug/[a-z.]*; do
     rsync -axv --delete-after $fdroiddir/repo/ /var/www/debug/$packageName/fdroid/repo/
     rsync -axv --delete-after $fdroiddir/archive/ /var/www/debug/$packageName/fdroid/archive/
 done
-
-cd ~/debug
-echo "<html><body><ul>" > index.html
-for packageName in *; do
-    icon=`ls -1 $packageName/fdroid/repo/icons-240/$packageName_*.png | sort -n | tail -1`
-    echo "<li><a href=\"/debug/$packageName/fdroid/repo\"><img src=\"$icon\" /> $packageName</a></li>" >> index.html
-done
-echo "</ul></body></html>" >> index.html
+echo "</ul></body></html>" >> ~/debug/index.html
+cp ~/debug/index.html /var/www/debug/index.html
