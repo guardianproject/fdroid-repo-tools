@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 set -x
@@ -59,10 +59,48 @@ $fdroid server update --verbose
 rsync -axv --delete-after repo/ /var/www/fdroid/repo/
 rsync -axv --delete-after archive/ /var/www/fdroid/archive/
 
+read -d '' htmlheader <<"EOF"
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Guardian Project Test Build Repository</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <link rel='stylesheet' id='admin-bar-css'  href='/fdroid/admin-bar.min.css?ver=3.7.1' type='text/css' media='all' />
+    <link rel='stylesheet' id='responsive-style-css'  href='/fdroid/style.css?ver=1.9.3.4' type='text/css' media='all' />
+    <link rel='stylesheet' id='responsive-media-queries-css'  href='/fdroid/core-css-style.css?ver=1.9.3.4' type='text/css' media='all' />
+
+    <style media="screen" type="text/css">
+        img {vertical-align:middle}
+        li {font-size: 200%; font-family:Inconsolata,monospace}
+        ul {list-style-type: none}
+    </style>
+</head>
+
+<body>
+    <div id="logo">
+        <a href="https://guardianproject.info/"><img src="/fdroid/cropped-GP_logo+txt_hires_black_on_trans_header.png" width="950" height="120" alt="The Guardian Project"/></a>
+    </div>
+    <!-- end of #logo -->
+
+    <div id="container" class="hfeed">
+        <div id="wrapper" class="clearfix">
+          <div id="widgets" class="home-widgets">
+            <div class="widget-title-home"><h2>Guardian Project Test Build Repository</h2></div>
+            <div class="textwidget">
+              This is our <a href="https://f-droid.org"
+                target="_blank">FDroid</a> app repository for our builds of
+                  our apps.  This repository and the apps it contains should
+                  only be used for testing.  <strong>These are not secure, final
+                  versions of our software!</strong>
+              </div>
+
+    <ul>
+EOF
+echo $htmlheader > ~/debug/index.html
 
 # now manage per-app repos
 basedir=`pwd`
-echo "<html><body><ul>" > ~/debug/index.html
 for d in ~/debug/[a-z.]*; do
     cd $basedir
     test -d $d || continue
@@ -70,7 +108,8 @@ for d in ~/debug/[a-z.]*; do
     test -d $d/fdroid/repo || continue
     packageName=`basename $d`
     icon=`cd ~/debug/ && ls -1 $packageName/fdroid/repo/icons-240/$packageName_*.png | sort -n | tail -1`
-    echo "<li><a href=\"/debug/$packageName/fdroid/repo?fingerprint=F8ED4C73C125E7A67F99DB269480DAF50BE1758952E07EE5ABF116FE4B2DB1E8\"><img src=\"$icon\" /> $packageName</a></li>" >> ~/debug/index.html
+    urlpath="/debug/$packageName/fdroid/repo?fingerprint=F8ED4C73C125E7A67F99DB269480DAF50BE1758952E07EE5ABF116FE4B2DB1E8"
+    echo "<li><a href=\"$urlpath\"><img src=\"/debug/$icon\" /><h2>$packageName</h2></a></li>" >> ~/debug/index.html
     fdroiddir=~/debug/$packageName/fdroid
     for f in */$packageName*.apk; do
         test -r $f || continue
@@ -88,5 +127,31 @@ for d in ~/debug/[a-z.]*; do
     rsync -axv --delete-after $fdroiddir/repo/ /var/www/debug/$packageName/fdroid/repo/
     rsync -axv --delete-after $fdroiddir/archive/ /var/www/debug/$packageName/fdroid/archive/
 done
-echo "</ul></body></html>" >> ~/debug/index.html
+
+read -d '' htmlfooter <<"EOF"
+    </ul>
+    <br style="clear:both;"/>
+
+    <h2>Signing Key Fingerprint</h2>
+    <div class="textwidget">
+      If you would like to manually verify the fingerprint (SHA-256)
+      of the repository signing key, here it is:
+      <pre>F8&nbsp;ED&nbsp;4C&nbsp;73&nbsp;C1&nbsp;25&nbsp;E7&nbsp;A6&nbsp;7F&nbsp;99&nbsp;DB&nbsp;26&nbsp;94&nbsp;80&nbsp;DA&nbsp;F5&nbsp;0B&nbsp;E1&nbsp;75&nbsp;89&nbsp;52&nbsp;E0&nbsp;7E&nbsp;E5&nbsp;AB&nbsp;F1&nbsp;16&nbsp;FE&nbsp;4B&nbsp;2D&nbsp;B1&nbsp;E8</pre>
+    </div>
+    
+    <h2>Questions or Problems?</h2>
+    <div class="textwidget">
+      If you have any questions or problems please email us
+          at:<address><a
+          href="mailto:support@guardianproject.info">support@guardianproject.info</a></address>
+          or <a href="https://guardianproject.info/contact/chat/"
+          target="_blank">ask in our chat room</a>.
+    </div>
+    </div>
+    </div>
+</body></html>
+EOF
+echo $htmlfooter >> ~/debug/index.html
+
+
 cp ~/debug/index.html /var/www/debug/index.html
