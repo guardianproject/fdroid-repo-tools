@@ -53,6 +53,35 @@ for f in `find $apksource -name '*.apk' 2> /dev/null \
 done
 
 $fdroid update --verbose --delete-unknown
+# post to repo on remote server
 $fdroid server update --verbose
+# post to local repo
 rsync -axv repo/ /var/www/fdroid/repo/
 rsync -axv archive/ /var/www/fdroid/archive/
+
+
+# now manage per-app repos
+basedir=`pwd`
+for d in ~/debug/[a-z.]* ~/release/[a-z.]*; do
+    cd $basedir
+    test -d $d || continue
+    test -d $d/fdroid || continue
+    test -d $d/fdroid/repo || continue
+    packageName=`basename $d`
+    fdroiddir=~/debug/$packageName/fdroid
+    for f in */$packageName*.apk; do
+        test -r $f || continue
+        if $aapt dump xmltree $f AndroidManifest.xml | grep 'android:debuggable.*0x0$'; then
+            echo WARNING: ignoring release builds for now...
+        else
+            rsync -ax $f $fdroiddir/repo/
+        fi
+    done
+    cd $d/fdroid
+    $fdroid update --verbose --delete-unknown
+    # post to repo on remote server
+    $fdroid server update --verbose
+    # post to local repo
+    rsync -axv $fdroiddir/repo/ /var/www/debug/$packageName/fdroid/repo/
+    rsync -axv $fdroiddir/archive/ /var/www/debug/$packageName/fdroid/archive/
+done
