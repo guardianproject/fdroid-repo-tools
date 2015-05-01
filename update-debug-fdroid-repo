@@ -97,7 +97,7 @@ read -d '' htmlheader <<"EOF"
 
     <ul>
 EOF
-echo $htmlheader > ~/debug/index.html
+echo "$htmlheader" > ~/debug/index.html
 
 # now manage per-app repos
 basedir=`pwd`
@@ -118,7 +118,7 @@ for d in ~/debug/[a-z.]*; do
     for f in */$packageName*.apk; do
         test -r $f || continue
         if $aapt dump xmltree $f AndroidManifest.xml | grep 'android:debuggable.*0x0$'; then
-            echo WARNING: ignoring release builds for now...
+            echo "WARNING: ignoring release builds for now..."
         else
             rsync -ax $f $fdroiddir/repo/
         fi
@@ -155,7 +155,7 @@ read -d '' htmlfooter <<"EOF"
     </div>
 </body></html>
 EOF
-echo $htmlfooter >> ~/debug/index.html
+echo "$htmlfooter" >> ~/debug/index.html
 
 
 cp ~/debug/index.html /var/www/debug/index.html
