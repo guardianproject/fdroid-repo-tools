@@ -111,6 +111,10 @@ for d in ~/debug/[a-z.]*; do
     urlpath="/debug/$packageName/fdroid/repo?fingerprint=F8ED4C73C125E7A67F99DB269480DAF50BE1758952E07EE5ABF116FE4B2DB1E8"
     echo "<li><a href=\"$urlpath\"><img src=\"/debug/$icon\" /><h2>$packageName</h2></a></li>" >> ~/debug/index.html
     fdroiddir=~/debug/$packageName/fdroid
+    qrpng=$fdroiddir/repo/qr.png
+    repoindex=$fdroiddir/repo/index.html
+    qr "https://dev.guardianproject.info$urlpath" > $qrpng
+    echo '<html><body><h1>https://dev.guardianproject.info$urlpath</h1><img src="qr.png" /></body></html>' > $repoindex
     for f in */$packageName*.apk; do
         test -r $f || continue
         if $aapt dump xmltree $f AndroidManifest.xml | grep 'android:debuggable.*0x0$'; then
