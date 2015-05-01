@@ -59,6 +59,7 @@ $fdroid server update --verbose
 rsync -axv --delete-after repo/ /var/www/fdroid/repo/
 rsync -axv --delete-after archive/ /var/www/fdroid/archive/
 
+set +e
 read -d '' htmlheader <<"EOF"
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -97,6 +98,7 @@ read -d '' htmlheader <<"EOF"
 
     <ul>
 EOF
+set -e
 echo "$htmlheader" > ~/debug/index.html
 
 # now manage per-app repos
@@ -132,6 +134,7 @@ for d in ~/debug/[a-z.]*; do
     rsync -axv --delete-after $fdroiddir/archive/ /var/www/debug/$packageName/fdroid/archive/
 done
 
+set +e
 read -d '' htmlfooter <<"EOF"
     </ul>
     <br style="clear:both;"/>
@@ -155,6 +158,7 @@ read -d '' htmlfooter <<"EOF"
     </div>
 </body></html>
 EOF
+set -e
 echo "$htmlfooter" >> ~/debug/index.html
 
 
