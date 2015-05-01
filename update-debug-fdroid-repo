@@ -110,13 +110,14 @@ for d in ~/debug/[a-z.]*; do
     test -d $d/fdroid/repo || continue
     packageName=`basename $d`
     icon=`cd ~/debug/ && ls -1 $packageName/fdroid/repo/icons-240/$packageName_*.png | sort -n | tail -1`
-    urlpath="/debug/$packageName/fdroid/repo?fingerprint=F8ED4C73C125E7A67F99DB269480DAF50BE1758952E07EE5ABF116FE4B2DB1E8"
+    urlpath="/debug/$packageName/fdroid/repo"
+    urlpathquery="$urlpath?fingerprint=F8ED4C73C125E7A67F99DB269480DAF50BE1758952E07EE5ABF116FE4B2DB1E8"
     echo "<li><a href=\"$urlpath\"><img src=\"/debug/$icon\" /><h2>$packageName</h2></a></li>" >> ~/debug/index.html
     fdroiddir=~/debug/$packageName/fdroid
     qrpng=$fdroiddir/repo/qr.png
     repoindex=$fdroiddir/repo/index.html
-    qr "https://dev.guardianproject.info$urlpath" > $qrpng
-    echo '<html><body><h1>https://dev.guardianproject.info$urlpath</h1><img src="qr.png" /></body></html>' > $repoindex
+    qr "https://dev.guardianproject.info$urlpathquery" > $qrpng
+    echo "<html><body><h1>https://dev.guardianproject.info$urlpathquery</h1><img src=\"$urlpath/qr.png\" /></body></html>" > $repoindex
     for f in */$packageName*.apk; do
         test -r $f || continue
         if $aapt dump xmltree $f AndroidManifest.xml | grep 'android:debuggable.*0x0$'; then
