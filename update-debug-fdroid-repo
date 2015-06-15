@@ -34,7 +34,7 @@ test -e keystore.jks || exit
 # if we can find the specific projects that want us, then narrow the APK
 # search to just those subdirs
 projects=`grep -F '<childProjects>update-debug-fdroid-repo</childProjects>' $apksource/jobs/*/config.xml \
-    | sed -n 's,\(.*/config.xml\):.*,\1,p'`
+    | sed -n 's,\(.*\)/config.xml:.*,\1,p'`
 if [ ! -z "$projects" ]; then
     apksource=$projects
 fi
