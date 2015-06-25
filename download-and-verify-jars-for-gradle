@@ -58,7 +58,7 @@ def getfilesfromurl(url):
         print('Using ' + gradledir)
 
         signedbasename, asc = os.path.splitext(signaturebasename)
-        print('looking for ' + signedbasename)
+#        print('looking for ' + signedbasename)
         foundfiles = glob.glob(gradledir + '/*/' + signedbasename)
         hashdir = gradledir
         signedfile = None
@@ -81,15 +81,16 @@ def getfilesfromurl(url):
             f.close()
         else:
             signedfile = foundfiles[0]
-            print('Found: ' + signedfile)
+#            print('Found: ' + signedfile)
 
-        print('get pgp signature: ' + signaturebasename)
-        dl = urllib2.urlopen(url + '/' + signaturebasename)
         dlascfile = os.path.join(hashdir, signaturebasename)
-        f = open(dlascfile, 'w')
-        f.write(dl.read())
-        f.close()
-        dl.close()
+        if not os.path.exists(dlascfile):
+            print('Getting pgp signature: ' + signaturebasename)
+            dl = urllib2.urlopen(url + '/' + signaturebasename)
+            f = open(dlascfile, 'w')
+            f.write(dl.read())
+            f.close()
+            dl.close()
 
         # the trust model is based on what is in the local keyring
         r = subprocess.call(['gpg2', '--quiet', '--homedir', gnupghome,
