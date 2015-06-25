@@ -1,0 +1,21 @@
+#!/bin/bash
+
+keys=""
+
+#Xavier Ducrohet <xav@android.com>
+keys="$keys 70C93CF16895AE540CBE6121484CE21876A0BEA4"
+keys="$keys D9E6E4CC8F66B2034995C7192189CA6247F3DEE5"
+
+# Jerome Dochez <jedo@google.com>
+keys="$keys 3872ED7D5904493D23D78FA2C4C8CB73B1435348"
+
+gnupghome=~/.gradle/gnupg
+# the trust model is based on what is in the local keyring
+gpg="gpg2 --keyserver zimmerman.mayfirst.org --homedir $gnupghome/ --trust-model always"
+
+test -d $gnupghome ||  mkdir $gnupghome
+chmod 0700 $gnupghome
+
+for key in $keys; do
+    $gpg --recv-keys $key
+done
