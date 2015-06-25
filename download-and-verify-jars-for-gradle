@@ -1,0 +1,114 @@
+#!/usr/bin/env python2
+
+import glob
+import hashlib
+import os
+import re
+import sys
+import subprocess
+import urllib2  # on < python 2.7.9, this does not verify HTTPS
+from urlparse import urljoin, urlparse
+import xml.etree.ElementTree as etree
+
+gradlehome = os.path.join(os.environ['HOME'], '.gradle')
+basedir = os.path.join(gradlehome, 'caches', 'modules-2', 'files-2.1')
+gnupghome = os.path.join(gradlehome, 'gnupg')
+
+
+groupId = 'UNSET_GROUPID'
+
+def getfilesfromurl(url):
+    global groupId
+
+    if url[-1] != '/':
+        url += '/'
+    print '----------------------------\nChecking ' + url
+
+    # first set the group id
+    try:
+        print('Getting ' + url + '/maven-metadata.xml')
+        f = urllib2.urlopen(url + '/maven-metadata.xml')
+        tree = etree.parse(f)
+        f.close()
+        groupId = tree.getroot().find('groupId').text
+        print('Using groupId: ' + groupId)
+    except urllib2.URLError as e:
+        print('No maven-metadata.xml at ' + url)
+
+
+    # find the available files and dirs
+    signaturebasenames = []
+    dirs = []
+    base = urllib2.urlopen(url)
+    for line in base.readlines():
+        m = re.match('.*href="#([^"]+)".*', line)
+        if m:
+            basename = m.group(1)
+            if re.match('.*(-beta[0-9]+|-rc[0-9]+)', basename):
+                print 'ignoring beta/rc: ' + basename
+            elif re.match('^0\..*', basename):
+                print 'ignoring 0.: ' + basename
+            elif os.path.splitext(basename)[1] == '.asc':
+                signaturebasenames.append(basename)
+            elif basename[-1] == '/':
+                getfilesfromurl(url + basename)
+
+    for signaturebasename in sorted(signaturebasenames, reverse=True):
+        gradledir = os.path.join(basedir, groupId, urlparse(url).path.split('/')[-3])
+        print('Using ' + gradledir)
+
+        signedbasename, asc = os.path.splitext(signaturebasename)
+        print('looking for ' + signedbasename)
+        foundfiles = glob.glob(gradledir + '/*/' + signedbasename)
+        hashdir = gradledir
+        signedfile = None
+        if len(foundfiles) == 0:
+            # get the file that is signed
+            f = urllib2.urlopen(url + '/' + signedbasename)
+            contents = f.read()
+            f.close()
+
+            sha1 = hashlib.sha1()
+            sha1.update(contents)
+
+            hashdir = gradledir + '/' + sha1.hexdigest()
+            if not os.path.isdir(hashdir):
+                os.makedirs(hashdir)
+            signedfile = os.path.join(hashdir, signedbasename)
+            print('downloading to ' + signedfile)
+            f = open(signedfile, 'w')
+            f.write(contents)
+            f.close()
+        else:
+            signedfile = foundfiles[0]
+            print('Found: ' + signedfile)
+
+        print('get pgp signature: ' + signaturebasename)
+        dl = urllib2.urlopen(url + '/' + signaturebasename)
+        dlascfile = os.path.join(hashdir, signaturebasename)
+        f = open(dlascfile, 'w')
+        f.write(dl.read())
+        f.close()
+        dl.close()
+
+        # the trust model is based on what is in the local keyring
+        r = subprocess.call(['gpg2', '--quiet', '--homedir', gnupghome,
+                             '--trust-model', 'always',
+                             '--verify', dlascfile, signedfile])
+        if r == 0:
+            print('Verified ' + signedfile)
+        else:
+            print(signedfile + " FAILED VERIFY, DELETING!")
+            os.remove(dlascfile)
+            os.remove(signedfile)
+            os.rmdir(os.path.dirname(signedfile))
+
+
+getfilesfromurl('https://jcenter.bintray.com/com/android/tools')
+#getfilesfromurl('https://jcenter.bintray.com/com/google/zxing/')
+#getfilesfromurl('https://jcenter.bintray.com/com/madgag/spongycastle/')
+#getfilesfromurl('https://jcenter.bintray.com/com/nostra13/universalimageloader/')
+#getfilesfromurl('https://jcenter.bintray.com/eu/chainfire/')
+#getfilesfromurl('https://jcenter.bintray.com/junit/')
+#getfilesfromurl('https://jcenter.bintray.com/org/bouncycastle/')
+#getfilesfromurl('https://jcenter.bintray.com/org/thoughtcrime/ssl/pinning/')
