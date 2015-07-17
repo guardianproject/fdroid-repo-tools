@@ -124,7 +124,12 @@ for d in ~/debug/[a-z.]*; do
         if $aapt dump xmltree $f AndroidManifest.xml | grep 'android:debuggable.*0x0$'; then
             echo "WARNING: ignoring release builds for now..."
         else
-            rsync -ax $f $fdroiddir/repo/
+            apk=`basename $f`
+            if [ -e $fdroiddir/archive/$apk ]; then
+                rsync -ax $f $fdroiddir/archive/
+            else
+                rsync -ax $f $fdroiddir/repo/
+            fi
         fi
     done
     cd $d/fdroid
