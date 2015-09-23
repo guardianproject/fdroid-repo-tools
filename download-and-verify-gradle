@@ -14,8 +14,11 @@ echo "8734b13a401f4311ee418173ed6ca8662d2b0a535be8ff2a43ecb1c13cd406ea  gradle-1
 echo "3eee4f9ea2ab0221b89f8e4747a96d4554d00ae46d8d633f11cfda60988bf878  gradle-2.1-bin.zip" > gradle-2.1-bin.zip.sha256
 echo "420aa50738299327b611c10b8304b749e8d3a579407ee9e755b15921d95ff418  gradle-2.2.1-bin.zip" > gradle-2.2.1-bin.zip.sha256
 echo "010dd9f31849abc3d5644e282943b1c1c355f8e2635c5789833979ce590a3774  gradle-2.3-bin.zip" > gradle-2.3-bin.zip.sha256
+echo "c4eaecc621a81f567ded1aede4a5ddb281cc02a03a6a87c4f5502add8fc2f16f  gradle-2.4-bin-zip" > gradle-2.4-bin.zip-sha256
+echo "3f953e0cb14bb3f9ebbe11946e84071547bf5dfd575d90cfe9cc4e788da38555  gradle-2.5-bin-zip" > gradle-2.5-bin.zip-sha256
+echo "18a98c560af231dfa0d3f8e0802c20103ae986f12428bb0a6f5396e8f14e9c83  gradle-2.6-bin-zip" > gradle-2.6-bin.zip-sha256
 
-for v in 1.4 1.6 1.7 1.8 1.9 1.10 1.11 1.12 2.1 2.2.1 2.3; do
+for v in 1.4 1.6 1.7 1.8 1.9 1.10 1.11 1.12 2.1 2.2.1 2.3 2.4 2.5 2.6; do
     wget --continue https://services.gradle.org/distributions/gradle-$v-bin.zip
     sha256sum -c gradle-$v-bin.zip.sha256
 done
